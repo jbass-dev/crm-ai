@@ -1,0 +1,32 @@
+# Render Blueprint — CRM AI backend
+# Deploy: Render Dashboard → New → Blueprint → connect the jbass-dev/crm-ai repo.
+# Frontend deploys separately on Vercel (see DEPLOYMENT.md). Postgres is on Neon.
+services:
+  - type: web
+    name: crm-ai-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    branch: main
+    healthCheckPath: /health
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx prisma db push --accept-data-loss --skip-generate && node src/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Neon pooled connection string (Dashboard → Connect → "Pooled connection")
+      - key: DATABASE_URL
+        sync: false
+      # Auto-generated on first deploy; no need to set it yourself
+      - key: JWT_SECRET
+        generateValue: true
+      # Your Groq API key (gsk_...)
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: OPENAI_MODEL
+        value: openai/gpt-oss-120b
+      # Your Vercel frontend URL, e.g. https://crm-ai.vercel.app
+      - key: CORS_ORIGIN
+        sync: false
