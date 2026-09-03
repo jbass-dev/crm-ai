@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "../../lib/api";
 import { saveSession } from "../../lib/useAuth";
@@ -9,8 +9,15 @@ export default function LoginPage() {
   const [mode, setMode] = useState("login"); // "login" | "signup"
   const [form, setForm] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("expired")) {
+      setNotice("Your session expired. Please sign in again.");
+    }
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -75,6 +82,7 @@ export default function LoginPage() {
           />
         </div>
 
+        {notice && !error && <p className="mb-4 text-sm text-amber-600">{notice}</p>}
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
         <button

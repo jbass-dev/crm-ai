@@ -18,6 +18,15 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
 
+  // Session expired or token invalid: clear the stale session and
+  // send the user to the login page instead of stranding them.
+  if (res.status === 401 && auth && typeof window !== "undefined") {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login?expired=1";
+    throw new Error("Session expired. Redirecting to login…");
+  }
+
   if (!res.ok) {
     let errorBody;
     try {
